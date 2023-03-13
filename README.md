@@ -58,7 +58,7 @@ $ make
 |`Scroll wheel`/<kbd>+</kbd>/<kbd>-</kbd>|zoom in and out|
 |<kbd>r</kbd>|reset position and zoom|
 |<kbd>n</kbd>|set sampling mode to nearest neighbour|
-|<kbd>n</kbd>|set sampling mode to bilinear|
+|<kbd>l</kbd>|set sampling mode to bilinear|
 |<kbd>h</kbd>|set sampling mode to lanczos|
 |<kbd>ESC</kbd>/<kbd>q</kbd>|quit
 
