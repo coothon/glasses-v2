@@ -34,28 +34,32 @@ $ make
 
 ### Short  
 
-  `-l`: shorthand for `--bilinear`  
-  `-n`: shorthand for `--nearest`  
-  `-h`: shorthand for `--lanczos`  
+|||
+|:---|:---|
+|`-l`|shorthand for `--bilinear`|
+|`-n`|shorthand for `--nearest`|
+|`-h`|shorthand for `--lanczos`|
 
 ### Long  
-
-  `--bilinear`:&nbsp;start with bilinear sampling  
-  `--nearest`:&nbsp;&nbsp;start with nearest neighbour sampling  
-  `--lanczos`:&nbsp;&nbsp;start with lanczos sampling  
-  `--help`:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print the help message  
-  `--keybinds`:&nbsp;print the keybinds  
+|||
+|:---|:---|
+|`--bilinear`|start with bilinear sampling|
+|`--nearest`|start with nearest neighbour sampling|
+|`--lanczos`|start with lanczos sampling|
+|`--help`|print the help message|
+|`--keybinds`|print the keybinds|
 
 ## Keybinds
 
-  `Left click and drag`:&nbsp;&nbsp;move image  
-  `Scroll wheel`/<kbd>+</kbd>/<kbd>-</kbd>:&nbsp;&nbsp;zoom in and out  
-  <kbd>r</kbd>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reset position and zoom  
-  <kbd>n</kbd>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set sampling mode to nearest neighbour  
-  <kbd>n</kbd>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set sampling mode to bilinear  
-  <kbd>h</kbd>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set sampling mode to lanczos  
-  <kbd>ESC</kbd>/<kbd>q</kbd>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quit
-
+|||
+|:---|:---|
+|`Left click and drag`|move image|
+|`Scroll wheel`/<kbd>+</kbd>/<kbd>-</kbd>|zoom in and out|
+|<kbd>r</kbd>|reset position and zoom|
+|<kbd>n</kbd>|set sampling mode to nearest neighbour|
+|<kbd>n</kbd>|set sampling mode to bilinear|
+|<kbd>h</kbd>|set sampling mode to lanczos|
+|<kbd>ESC</kbd>/<kbd>q</kbd>|quit
 
 ---
 
