@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE 1
 #include "include/glad.h"
 #include "include/khrplatform.h"
 #include <math.h>
@@ -17,9 +18,10 @@
 #include "include/file.h"
 #include "include/render.h"
 
-int         switch_sample = SWITCH_BILINEAR;
-const char *path_to_image = NULL;
-glasses     prog          = { 0 };
+int         switch_sample  = SWITCH_LANCZOS;
+bool        many_file_mode = false;
+const char *path_to_image  = NULL;
+glasses     prog           = { 0 };
 
 int switch_long(const char *long_switch) {
 	if (strcmp(long_switch, "--help") == 0) {
@@ -74,14 +76,15 @@ void clean_up(void) {
 
 int main(int argc, char **argv) {
 	if (argc <= 1) {
-		print_error("No file path supplied.");
-		print_help();
-		return EXIT_FAILURE;
+		print_info(
+		    "No file path supplied. Defaulting to `./' directory.");
+		many_file_mode      = true;
+		prog.many_files_dir = "./";
 	}
 
 	stbi_set_flip_vertically_on_load(1);
-
 	bool found_image = false;
+
 	for (int i = 1; i < argc; ++i) {
 		if (argv[i][0] == '-' && argv[i][1] != '\0' &&
 		    argv[i][1] != '-') {
@@ -96,11 +99,16 @@ int main(int argc, char **argv) {
 				print_error("Invalid argument: `%s.'", argv[i]);
 				return EXIT_FAILURE;
 			}
-		} else if (is_file(argv[i]) && !found_image) {
+		} else if (is_folder(argv[i]) && !found_image) {
+			many_file_mode      = true;
+			prog.many_files_dir = argv[i];
+			found_image = true;
+		} else if (is_file(argv[i]) && !found_image &&
+		           !many_file_mode) {
 			// argv[i] is the path to the image.
 			path_to_image = argv[i];
 			found_image   = true;
-		} else if (is_file(argv[i]) && found_image) {
+		} else if (is_file(argv[i]) && found_image && !many_file_mode) {
 			print_info("Ignoring additional file path: `%s.'",
 			           argv[i]);
 		} else {
@@ -109,18 +117,38 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	// Get user-supplied image from disk.
-	prog.current_image = path_to_image;
-	prog.imgdata = stbi_load(path_to_image, &prog.imgwidth, &prog.imgheight,
-	                         &prog.imgchannels, STBI_rgb_alpha);
-	if (!prog.imgdata) {
-		print_error(
-		    "Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
-		    path_to_image);
-		return EXIT_FAILURE;
+
+	if (!many_file_mode) {
+		// Get user-supplied image from disk.
+		prog.current_image = path_to_image;
+		prog.imgdata =
+		    stbi_load(path_to_image, &prog.imgwidth, &prog.imgheight,
+		              &prog.imgchannels, STBI_rgb_alpha);
+		if (!prog.imgdata) {
+			print_error(
+			    "Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
+			    path_to_image);
+			return EXIT_FAILURE;
+		}
+		prog.imgwidth_f  = (GLfloat)prog.imgwidth;
+		prog.imgheight_f = (GLfloat)prog.imgheight;
+	} else {
+		int dirstrlen = strlen(prog.many_files_dir);
+		if (prog.many_files_dir[dirstrlen-1] != '/') {
+			char *tmp = malloc((dirstrlen+2) * sizeof(char));
+			strcpy(tmp, prog.many_files_dir);
+			strcat(tmp, "/");
+			prog.many_files_dir = tmp;
+		}
+		get_filenames_in_dir(prog.many_files_dir, &prog.many_files,
+		                     &prog.count_many_files);
+		prog.index_many_files = 0;
+		if (prog.count_many_files < 1) exit(EXIT_FAILURE);
+		if (many_files_next(&prog) != 0) {
+			print_error("No image files in directory.");
+			exit(EXIT_FAILURE);
+		}
 	}
-	prog.imgwidth_f  = (GLfloat)prog.imgwidth;
-	prog.imgheight_f = (GLfloat)prog.imgheight;
 
 	// GLFW init.
 	if (!glfwInit()) {

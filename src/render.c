@@ -28,7 +28,7 @@ GLint renderer_init(glasses *g) {
 	             r->indices, GL_STATIC_DRAW);
 
 	r->vert_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(r->vert_shader, 1, &__shaders_image_vert, NULL);
+	glShaderSource(r->vert_shader, 1, &embedded_shader_image_vert, NULL);
 	glCompileShader(r->vert_shader);
 
 	/* Check. */ {
@@ -45,7 +45,7 @@ GLint renderer_init(glasses *g) {
 	}
 
 	r->frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(r->frag_shader, 1, &__shaders_image_frag, NULL);
+	glShaderSource(r->frag_shader, 1, &embedded_shader_image_frag, NULL);
 	glCompileShader(r->frag_shader);
 
 	/* Check. */ {
@@ -93,17 +93,6 @@ GLint renderer_init(glasses *g) {
 	                      (void *)offsetof(vertex, uv));
 
 
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(glGetUniformLocation(r->shader_program, "tex"), 0);
-	glGenTextures(1, &r->texture);
-	glBindTexture(GL_TEXTURE_2D, r->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g->imgwidth, g->imgheight, 0,
-	             GL_RGBA, GL_UNSIGNED_BYTE, g->imgdata);
-	stbi_image_free(g->imgdata);
 
 	r->uniform_is_lanczos =
 	    glGetUniformLocation(r->shader_program, "is_lanczos");
@@ -116,6 +105,13 @@ GLint renderer_init(glasses *g) {
 	    glGetUniformLocation(r->shader_program, "logical_pos");
 	r->uniform_viewport_size =
 	    glGetUniformLocation(r->shader_program, "viewport_size");
+
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(glGetUniformLocation(r->shader_program, "tex"), 0);
+	glGenTextures(1, &r->texture);
+	glBindTexture(GL_TEXTURE_2D, r->texture);
+
+	renderer_send_image(g);
 
 	switch (switch_sample) {
 	case SWITCH_NEAREST: {
@@ -149,7 +145,6 @@ GLint renderer_init(glasses *g) {
 		    switch_sample, __FILE__, __LINE__);
 	}
 		exit(EXIT_FAILURE);
-	}
 #else
 	default: {
 		print_info(
@@ -161,14 +156,69 @@ GLint renderer_init(glasses *g) {
 		glUniform1i(prog.image.uniform_is_lanczos, 0);
 	} break;
 #endif
+	}
 
-	glUniform2f(prog.image.uniform_texsize, prog.imgwidth_f,
-	            prog.imgheight_f);
 	glUniform2f(prog.image.uniform_viewport_size,
 	            (GLfloat)prog.window_size[0], (GLfloat)prog.window_size[1]);
 	glUniform1f(prog.image.uniform_perfect_scale, 1.0f);
 
 	return EXIT_SUCCESS;
+}
+
+GLint many_files_prev(glasses *g) {
+	int cpy_index = g->index_many_files;
+	int r         = -1;
+	do { --(g->index_many_files); } while ((r = many_files_load(g)) == -1);
+	if (r == -2) {
+		g->index_many_files = cpy_index;
+		return -1;
+	} else if (r == -3) {
+		g->index_many_files = cpy_index;
+		return -1;
+	}
+
+	return 0;
+}
+GLint many_files_next(glasses *g) {
+	int cpy_index = g->index_many_files;
+	int r         = -1;
+	do { ++(g->index_many_files); } while ((r = many_files_load(g)) == -1);
+	if (r == -2) {
+		g->index_many_files = cpy_index;
+		return -1;
+	} else if (r == -3) {
+		g->index_many_files = cpy_index;
+		return -1;
+	}
+
+	return 0;
+}
+
+GLint many_files_load(glasses *g) {
+	if (g->index_many_files >= g->count_many_files) return -2;
+	if (g->index_many_files < 0) return -3;
+	prog.imgdata =
+	    stbi_load(g->many_files[g->index_many_files], &prog.imgwidth,
+	              &prog.imgheight, &prog.imgchannels, STBI_rgb_alpha);
+	if (!prog.imgdata) return -1;
+	prog.imgwidth_f  = (GLfloat)prog.imgwidth;
+	prog.imgheight_f = (GLfloat)prog.imgheight;
+	return 0;
+}
+
+GLint renderer_send_image(glasses *g) {
+	renderer *r = &g->image;
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g->imgwidth, g->imgheight, 0,
+	             GL_RGBA, GL_UNSIGNED_BYTE, g->imgdata);
+	stbi_image_free(g->imgdata);
+
+	glUniform2f(prog.image.uniform_texsize, prog.imgwidth_f,
+	            prog.imgheight_f);
 }
 
 void glfw_error_cb(GLint e, const GLchar *desc) {
@@ -238,6 +288,62 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
 
 		case GLFW_KEY_RIGHT: {
 			prog.image.logical_pos[0] -= MOVE_AMOUNT;
+		} break;
+
+		case GLFW_KEY_ENTER: {
+			if (many_file_mode && many_files_next(&prog) == 0) {
+				GLfloat perfect_scale = 0.0f;
+				renderer_send_image(&prog);
+				if (prog.window_size[0] < prog.window_size[1]) {
+					perfect_scale =
+					    (prog.imgwidth_f > prog.imgheight_f)
+						? prog.window_size[0] /
+						      prog.imgwidth_f
+						: prog.window_size[0] /
+						      prog.imgheight_f;
+				} else {
+					perfect_scale =
+					    (prog.imgwidth_f > prog.imgheight_f)
+						? prog.window_size[1] /
+						      prog.imgwidth_f
+						: prog.window_size[1] /
+						      prog.imgheight_f;
+				}
+				prog.drag_mode            = GL_FALSE;
+				prog.image.logical_pos[0] = 0.0f;
+				prog.image.logical_pos[1] = 0.0f;
+				prog.image.scale          = 1.0f;
+				glUniform1f(prog.image.uniform_perfect_scale,
+				            perfect_scale);
+			}
+		} break;
+
+		case GLFW_KEY_BACKSPACE: {
+			if (many_file_mode && many_files_prev(&prog) == 0) {
+				GLfloat perfect_scale = 0.0f;
+				renderer_send_image(&prog);
+				if (prog.window_size[0] < prog.window_size[1]) {
+					perfect_scale =
+					    (prog.imgwidth_f > prog.imgheight_f)
+						? prog.window_size[0] /
+						      prog.imgwidth_f
+						: prog.window_size[0] /
+						      prog.imgheight_f;
+				} else {
+					perfect_scale =
+					    (prog.imgwidth_f > prog.imgheight_f)
+						? prog.window_size[1] /
+						      prog.imgwidth_f
+						: prog.window_size[1] /
+						      prog.imgheight_f;
+				}
+				prog.drag_mode            = GL_FALSE;
+				prog.image.logical_pos[0] = 0.0f;
+				prog.image.logical_pos[1] = 0.0f;
+				prog.image.scale          = 1.0f;
+				glUniform1f(prog.image.uniform_perfect_scale,
+				            perfect_scale);
+			}
 		} break;
 
 		default:

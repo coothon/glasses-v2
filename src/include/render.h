@@ -1,6 +1,7 @@
 #ifndef GLASSES2_RENDER_H_
 #define GLASSES2_RENDER_H_
 
+#define _DEFAULT_SOURCE 1
 #include "glad.h"
 #include "khrplatform.h"
 #define GLFW_INCLUDE_NONE
@@ -45,6 +46,10 @@ typedef struct renderer {
 } renderer;
 
 typedef struct glasses {
+	GLchar **many_files;
+	GLchar *many_files_dir;
+	int count_many_files;
+	int index_many_files;
 	GLdouble    total_time;
 	GLdouble    cursor[2];
 	GLboolean   drag_mode;
@@ -60,6 +65,10 @@ typedef struct glasses {
 extern glasses prog;
 
 GLint renderer_init(glasses *g);
+GLint many_files_prev(glasses *g);
+GLint many_files_next(glasses *g);
+GLint many_files_load(glasses *g);
+GLint renderer_send_image(glasses *g);
 
 void glfw_error_cb(GLint e, const GLchar *desc);
 void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
