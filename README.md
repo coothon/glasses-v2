@@ -24,7 +24,7 @@ $ make
 
 ### Dependencies
 
- - OpenGL 4.6 (you can chage the version, if you want) supported video card and drivers.
+ - OpenGL 4.6 (you can change the version, if you want) supported video card and drivers.
  - Linux.
  - GLFW3.
 
