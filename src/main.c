@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 	                         &prog.imgchannels, STBI_rgb_alpha);
 	if (!prog.imgdata) {
 		print_error(
-		    "Unable to load image from file `%s', or the file is not a supported format (see `--help').",
+		    "Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
 		    path_to_image);
 		return EXIT_FAILURE;
 	}
@@ -137,8 +137,7 @@ int main(int argc, char **argv) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	prog.win = glfwCreateWindow(prog.imgwidth, prog.imgheight, "Glasses",
-	                            NULL, NULL);
+	prog.win = glfwCreateWindow(1280, 720, "Glasses", NULL, NULL);
 	if (!prog.win) {
 		print_error("GLFW window creation failed.");
 		return EXIT_FAILURE;

@@ -98,6 +98,7 @@ GLint renderer_init(glasses *g) {
 	glGenTextures(1, &r->texture);
 	glBindTexture(GL_TEXTURE_2D, r->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g->imgwidth, g->imgheight, 0,
