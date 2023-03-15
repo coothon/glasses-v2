@@ -10,7 +10,8 @@ This is a program for viewing images "interactively": click and drag to move the
 ## Usage
 
 ```shell
-$ glasses [switches] [path_to_image]
+$ glasses [switches] [path_to_image] # to load one image
+$ glasses [switches] [path_to_directory] # to load all images in a directory
 ```
 
 ---
@@ -60,7 +61,9 @@ $ make
 |<kbd>n</kbd>|set sampling mode to nearest neighbour|
 |<kbd>l</kbd>|set sampling mode to bilinear|
 |<kbd>h</kbd>|set sampling mode to lanczos|
-|<kbd>ESC</kbd>/<kbd>q</kbd>|quit
+|<kbd>ESC</kbd>/<kbd>q</kbd>|quit|
+|<kbd>ENTER</kbd>|next image|
+|<kbd>BACKSPACE</kbd>|previous image|
 
 ---
 
