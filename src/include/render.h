@@ -9,16 +9,17 @@
 #include <GLFW/glfw3.h>
 
 #include "common.h"
-#include "list.h"
 #include "conf.h"
 #include "console.h"
+#include "list.h"
 
 #define GLFW_TO_SCREEN_X(pos) \
 (GLfloat)((pos)) - ((GLfloat)(prog.window_size[0]) / 2.0f)
 #define GLFW_TO_SCREEN_Y(pos) \
 -((GLfloat)((pos)) - ((GLfloat)(prog.window_size[1]) / 2.0f))
 
-#define ZOOM_INC 1.1f // Multiplies by 1.1f.
+// Multiplies by 1.1f.
+#define ZOOM_INC 1.1f
 #define ZOOM_DEC (1.0f / ZOOM_INC)
 #define ZOOM_MAX 25.0f
 #define ZOOM_MIN 0.5f
@@ -47,10 +48,10 @@ typedef struct renderer {
 } renderer;
 
 typedef struct glasses {
-	int many_files_total_count;
-	int many_files_current_index;
-	list_node *many_files;
-	GLchar *many_files_dir;
+	int         many_files_total_count;
+	int         many_files_current_index;
+	list_node  *many_files;
+	GLchar     *many_files_dir;
 	GLdouble    total_time;
 	GLdouble    cursor[2];
 	GLboolean   drag_mode;
@@ -65,11 +66,11 @@ typedef struct glasses {
 } glasses;
 extern glasses prog;
 
-GLint renderer_init(glasses *g);
-GLint many_files_prev(glasses *g);
-GLint many_files_next(glasses *g);
+GLint      renderer_init(glasses *g);
+GLint      many_files_prev(glasses *g);
+GLint      many_files_next(glasses *g);
 list_node *many_files_load(list_node *file_node);
-GLint renderer_send_image(glasses *g);
+GLint      renderer_send_image(glasses *g);
 
 void glfw_error_cb(GLint e, const GLchar *desc);
 void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,

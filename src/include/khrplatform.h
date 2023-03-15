@@ -141,7 +141,7 @@
  * basic type definitions
  *-----------------------------------------------------------------------*/
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
-    defined(__GNUC__) || defined(__SCO__) || defined(__USLC__)
+	defined(__GNUC__) || defined(__SCO__) || defined(__USLC__)
 
 
 /*

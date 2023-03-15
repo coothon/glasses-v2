@@ -1,8 +1,8 @@
 #ifndef GLASSES2_LIST_H_
 #define GLASSES2_LIST_H_
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct list_node list_node;
@@ -26,7 +26,7 @@ if (!current_enum) break;           \
 #define PRINT_LIST_ALL(list) PRINT_LIST_FROM(seek_beginning((list)))
 
 list_node *at_index_from(list_node *origin, int index);
-int get_index_from_beginning(list_node *node); 
+int        get_index_from_beginning(list_node *node);
 
 // Assumes to_insert has sufficient scope; essentially must be malloced.
 list_node *insert_after(list_node *node, const char *to_insert);

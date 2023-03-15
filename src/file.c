@@ -48,6 +48,7 @@ list_node *get_filenames_in_dir(const char *dir_path) {
 	list_node *next_node = NULL;
 	list_node *beginning = current_node;
 
+	int count = 0;
 	while ((entry = readdir(dir)) != NULL) {
 		if (entry->d_type == DT_REG) {
 			size_t d_name_len  = strlen(entry->d_name);
@@ -55,20 +56,21 @@ list_node *get_filenames_in_dir(const char *dir_path) {
 			if (!current_node->item) return NULL;
 
 			// I think I'm doing this right.
-			*((char *)mem_copy(
-			    mem_copy(current_node->item, dir_path, pathlen),
-			    entry->d_name, d_name_len)) = '\0';
+			*((char *)mem_copy(mem_copy(current_node->item, dir_path, pathlen),
+			                   entry->d_name, d_name_len)) = '\0';
 
 			// Create next node.
 			next_node    = insert_after(current_node, NULL);
 			current_node = next_node;
+			++count;
 		}
 	}
 
 
-	current_node->prev->next = NULL;
+	if (current_node->prev) current_node->prev->next = NULL;
 	free(current_node); // Last one is always unused.
 
 	closedir(dir);
+	if (count == 0) return NULL;
 	return beginning;
 }

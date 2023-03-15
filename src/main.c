@@ -77,8 +77,7 @@ void clean_up(void) {
 
 int main(int argc, char **argv) {
 	if (argc <= 1) {
-		print_info(
-		    "No file path supplied. Defaulting to `./' directory.");
+		print_info("No file path supplied. Defaulting to `./' directory.");
 		many_file_mode      = true;
 		prog.many_files_dir = "./";
 	}
@@ -92,15 +91,14 @@ int main(int argc, char **argv) {
 		if (!stop_opt && strcmp(argv[i], "--") == 0) {
 			// dash dash stops option parsing
 			stop_opt = true;
-		} else if (!stop_opt && argv[i][0] == '-' &&
-		           argv[i][1] != '\0' && argv[i][1] != '-') {
+		} else if (!stop_opt && argv[i][0] == '-' && argv[i][1] != '\0' &&
+		           argv[i][1] != '-') {
 			// argv[i] is a short switch.
 			if (switch_short(argv[i]) < 0) {
 				print_error("Invalid argument: `%s.'", argv[i]);
 				return EXIT_FAILURE;
 			}
-		} else if (!stop_opt && argv[i][0] == '-' &&
-		           argv[i][1] == '-') {
+		} else if (!stop_opt && argv[i][0] == '-' && argv[i][1] == '-') {
 			// argv[i] is a long switch.
 			if (switch_long(argv[i]) < 0) {
 				print_error("Invalid argument: `%s.'", argv[i]);
@@ -110,14 +108,12 @@ int main(int argc, char **argv) {
 			many_file_mode      = true;
 			prog.many_files_dir = argv[i];
 			found_image         = true;
-		} else if (is_file(argv[i]) && !found_image &&
-		           !many_file_mode) {
+		} else if (is_file(argv[i]) && !found_image && !many_file_mode) {
 			// argv[i] is the path to the image.
 			path_to_image = argv[i];
 			found_image   = true;
 		} else if (is_file(argv[i]) && found_image && !many_file_mode) {
-			print_info("Ignoring additional file path: `%s.'",
-			           argv[i]);
+			print_info("Ignoring additional file path: `%s.'", argv[i]);
 		} else {
 			print_error("Invalid argument: `%s.'", argv[i]);
 			return EXIT_FAILURE;
@@ -128,13 +124,12 @@ int main(int argc, char **argv) {
 	if (!many_file_mode) {
 		// Get user-supplied image from disk.
 		prog.current_image = path_to_image;
-		prog.imgdata =
-		    stbi_load(path_to_image, &prog.imgwidth, &prog.imgheight,
-		              &prog.imgchannels, STBI_rgb_alpha);
+		prog.imgdata = stbi_load(path_to_image, &prog.imgwidth, &prog.imgheight,
+		                         &prog.imgchannels, STBI_rgb_alpha);
 		if (!prog.imgdata) {
 			print_error(
-			    "Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
-			    path_to_image);
+				"Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
+				path_to_image);
 			return EXIT_FAILURE;
 		}
 		prog.imgwidth_f  = (GLfloat)prog.imgwidth;
@@ -145,14 +140,17 @@ int main(int argc, char **argv) {
 			// If there is no trailing slash, append one.
 			char  slash[] = "/";
 			char *tmp     = malloc(dirstrlen + sizeof slash);
-			char *p = mem_copy(tmp, prog.many_files_dir, dirstrlen);
-			p       = mem_copy(p, slash,
-			                   sizeof slash); /* also copies the nul-byte
-			                                     from `slash` */
+			char *p       = mem_copy(tmp, prog.many_files_dir, dirstrlen);
+			p             = mem_copy(
+                p, slash,
+                sizeof slash); /* also copies the nul-byte from `slash` */
 			prog.many_files_dir = tmp;
 		}
 		prog.many_files = get_filenames_in_dir(prog.many_files_dir);
-		if (!prog.many_files) exit(EXIT_FAILURE);
+		if (!prog.many_files) {
+			print_error("No files in directory.");
+			exit(EXIT_FAILURE);
+		}
 		// Try load first file.
 		if (!many_files_load(prog.many_files)) {
 			// Keep trying until a valid image is found; otherwise,
@@ -164,7 +162,7 @@ int main(int argc, char **argv) {
 		}
 		prog.many_files_total_count = count_nodes(prog.many_files);
 		prog.many_files_current_index =
-		    get_index_from_beginning(prog.many_files);
+			get_index_from_beginning(prog.many_files);
 	}
 
 	// GLFW init.
@@ -214,11 +212,10 @@ int main(int argc, char **argv) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUniform1f(prog.image.uniform_scale, prog.image.scale);
-		glUniform2f(prog.image.uniform_logical_pos,
-		            prog.image.logical_pos[0],
+		glUniform2f(prog.image.uniform_logical_pos, prog.image.logical_pos[0],
 		            prog.image.logical_pos[1]);
-		glDrawElements(GL_TRIANGLES, prog.image.num_indices,
-		               GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, prog.image.num_indices, GL_UNSIGNED_INT,
+		               0);
 
 		glfwSwapBuffers(prog.win);
 		glfwWaitEvents();

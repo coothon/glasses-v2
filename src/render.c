@@ -20,8 +20,8 @@ GLint renderer_init(glasses *g) {
 	glBindVertexArray(r->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, r->VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * r->num_vertices,
-	             r->vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * r->num_vertices, r->vertices,
+	             GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, r->EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * r->num_indices,
@@ -34,11 +34,9 @@ GLint renderer_init(glasses *g) {
 	/* Check. */ {
 		GLint  shader_status;
 		GLchar shader_log[512];
-		glGetShaderiv(r->vert_shader, GL_COMPILE_STATUS,
-		              &shader_status);
+		glGetShaderiv(r->vert_shader, GL_COMPILE_STATUS, &shader_status);
 		if (!shader_status) {
-			glGetShaderInfoLog(r->vert_shader, 512, NULL,
-			                   shader_log);
+			glGetShaderInfoLog(r->vert_shader, 512, NULL, shader_log);
 			print_error(shader_log);
 			exit(EXIT_FAILURE);
 		}
@@ -51,11 +49,9 @@ GLint renderer_init(glasses *g) {
 	/* Check. */ {
 		GLint  shader_status;
 		GLchar shader_log[512];
-		glGetShaderiv(r->frag_shader, GL_COMPILE_STATUS,
-		              &shader_status);
+		glGetShaderiv(r->frag_shader, GL_COMPILE_STATUS, &shader_status);
 		if (!shader_status) {
-			glGetShaderInfoLog(r->frag_shader, 512, NULL,
-			                   shader_log);
+			glGetShaderInfoLog(r->frag_shader, 512, NULL, shader_log);
 			print_error(shader_log);
 			exit(EXIT_FAILURE);
 		}
@@ -69,11 +65,9 @@ GLint renderer_init(glasses *g) {
 	/* Check. */ {
 		GLint  program_status;
 		GLchar program_log[512];
-		glGetProgramiv(r->shader_program, GL_LINK_STATUS,
-		               &program_status);
+		glGetProgramiv(r->shader_program, GL_LINK_STATUS, &program_status);
 		if (!program_status) {
-			glGetProgramInfoLog(r->shader_program, 512, NULL,
-			                    program_log);
+			glGetProgramInfoLog(r->shader_program, 512, NULL, program_log);
 			print_error(program_log);
 			exit(EXIT_FAILURE);
 		}
@@ -95,16 +89,15 @@ GLint renderer_init(glasses *g) {
 
 
 	r->uniform_is_lanczos =
-	    glGetUniformLocation(r->shader_program, "is_lanczos");
-	r->uniform_texsize =
-	    glGetUniformLocation(r->shader_program, "tex_size");
-	r->uniform_scale = glGetUniformLocation(r->shader_program, "scale");
+		glGetUniformLocation(r->shader_program, "is_lanczos");
+	r->uniform_texsize = glGetUniformLocation(r->shader_program, "tex_size");
+	r->uniform_scale   = glGetUniformLocation(r->shader_program, "scale");
 	r->uniform_perfect_scale =
-	    glGetUniformLocation(r->shader_program, "perfect_scale");
+		glGetUniformLocation(r->shader_program, "perfect_scale");
 	r->uniform_logical_pos =
-	    glGetUniformLocation(r->shader_program, "logical_pos");
+		glGetUniformLocation(r->shader_program, "logical_pos");
 	r->uniform_viewport_size =
-	    glGetUniformLocation(r->shader_program, "viewport_size");
+		glGetUniformLocation(r->shader_program, "viewport_size");
 
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(r->shader_program, "tex"), 0);
@@ -115,44 +108,35 @@ GLint renderer_init(glasses *g) {
 
 	switch (switch_sample) {
 	case SWITCH_NEAREST: {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-		                GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-		                GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glUniform1i(g->image.uniform_is_lanczos, 0);
 	} break;
 
 	case SWITCH_BILINEAR: {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-		                GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-		                GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glUniform1i(g->image.uniform_is_lanczos, 0);
 	} break;
 
 	case SWITCH_LANCZOS: {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-		                GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-		                GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glUniform1i(g->image.uniform_is_lanczos, 1);
 	} break;
 
 #if GLASSES2_DEBUG
 	default: {
-		print_error(
-		    "Unexpected occurrence (switch_sample = %d) at: %s:%s.",
-		    switch_sample, __FILE__, __LINE__);
+		print_error("Unexpected occurrence (switch_sample = %d) at: %s:%s.",
+		            switch_sample, __FILE__, __LINE__);
 	}
 		exit(EXIT_FAILURE);
 #else
 	default: {
 		print_info(
-		    "Something unexpected but recoverable happened. Falling back to nearest neighbour sampling.");
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-		                GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-		                GL_NEAREST);
+			"Something unexpected but recoverable happened. Falling back to nearest neighbour sampling.");
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glUniform1i(g->image.uniform_is_lanczos, 0);
 	} break;
 #endif
@@ -180,7 +164,7 @@ GLint many_files_prev(glasses *g) {
 			g->many_files             = current_enum;
 			g->many_files_total_count = count_nodes(g->many_files);
 			g->many_files_current_index =
-			    get_index_from_beginning(g->many_files);
+				get_index_from_beginning(g->many_files);
 			return 0;
 		}
 
@@ -205,7 +189,7 @@ GLint many_files_next(glasses *g) {
 			g->many_files             = current_enum;
 			g->many_files_total_count = count_nodes(g->many_files);
 			g->many_files_current_index =
-			    get_index_from_beginning(g->many_files);
+				get_index_from_beginning(g->many_files);
 			return 0;
 		}
 
@@ -219,9 +203,8 @@ list_node *many_files_load(list_node *file_node) {
 	if (!file_node) return NULL;
 	if (!file_node->item) return NULL;
 
-	prog.imgdata =
-	    stbi_load(file_node->item, &prog.imgwidth, &prog.imgheight,
-	              &prog.imgchannels, STBI_rgb_alpha);
+	prog.imgdata = stbi_load(file_node->item, &prog.imgwidth, &prog.imgheight,
+	                         &prog.imgchannels, STBI_rgb_alpha);
 	if (!prog.imgdata) return NULL;
 	prog.imgwidth_f  = (GLfloat)prog.imgwidth;
 	prog.imgheight_f = (GLfloat)prog.imgheight;
@@ -261,18 +244,14 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
 		} break;
 
 		case GLFW_KEY_L: {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			                GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-			                GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glUniform1i(prog.image.uniform_is_lanczos, 0);
 		} break;
 
 		case GLFW_KEY_N: {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			                GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-			                GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glUniform1i(prog.image.uniform_is_lanczos, 0);
 		} break;
 
@@ -317,25 +296,20 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
 				renderer_send_image(&prog);
 				if (prog.window_size[0] < prog.window_size[1]) {
 					perfect_scale =
-					    (prog.imgwidth_f > prog.imgheight_f)
-						? prog.window_size[0] /
-						      prog.imgwidth_f
-						: prog.window_size[0] /
-						      prog.imgheight_f;
+						(prog.imgwidth_f > prog.imgheight_f)
+							? prog.window_size[0] / prog.imgwidth_f
+							: prog.window_size[0] / prog.imgheight_f;
 				} else {
 					perfect_scale =
-					    (prog.imgwidth_f > prog.imgheight_f)
-						? prog.window_size[1] /
-						      prog.imgwidth_f
-						: prog.window_size[1] /
-						      prog.imgheight_f;
+						(prog.imgwidth_f > prog.imgheight_f)
+							? prog.window_size[1] / prog.imgwidth_f
+							: prog.window_size[1] / prog.imgheight_f;
 				}
 				prog.drag_mode            = GL_FALSE;
 				prog.image.logical_pos[0] = 0.0f;
 				prog.image.logical_pos[1] = 0.0f;
 				prog.image.scale          = 1.0f;
-				glUniform1f(prog.image.uniform_perfect_scale,
-				            perfect_scale);
+				glUniform1f(prog.image.uniform_perfect_scale, perfect_scale);
 
 				print_debug("Current Image: [%d/%d].\n",
 				            prog.many_files_current_index,
@@ -349,25 +323,20 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
 				renderer_send_image(&prog);
 				if (prog.window_size[0] < prog.window_size[1]) {
 					perfect_scale =
-					    (prog.imgwidth_f > prog.imgheight_f)
-						? prog.window_size[0] /
-						      prog.imgwidth_f
-						: prog.window_size[0] /
-						      prog.imgheight_f;
+						(prog.imgwidth_f > prog.imgheight_f)
+							? prog.window_size[0] / prog.imgwidth_f
+							: prog.window_size[0] / prog.imgheight_f;
 				} else {
 					perfect_scale =
-					    (prog.imgwidth_f > prog.imgheight_f)
-						? prog.window_size[1] /
-						      prog.imgwidth_f
-						: prog.window_size[1] /
-						      prog.imgheight_f;
+						(prog.imgwidth_f > prog.imgheight_f)
+							? prog.window_size[1] / prog.imgwidth_f
+							: prog.window_size[1] / prog.imgheight_f;
 				}
 				prog.drag_mode            = GL_FALSE;
 				prog.image.logical_pos[0] = 0.0f;
 				prog.image.logical_pos[1] = 0.0f;
 				prog.image.scale          = 1.0f;
-				glUniform1f(prog.image.uniform_perfect_scale,
-				            perfect_scale);
+				glUniform1f(prog.image.uniform_perfect_scale, perfect_scale);
 
 				print_debug("Current Image: [%d/%d].\n",
 				            prog.many_files_current_index,
@@ -432,8 +401,8 @@ void glfw_framebuffer_size_cb(GLFWwindow *w, GLint fbwidth, GLint fbheight) {
 		                    : prog.window_size[1] / prog.imgheight_f;
 	}
 
-	glUniform2f(prog.image.uniform_viewport_size,
-	            (GLfloat)prog.window_size[0], (GLfloat)prog.window_size[1]);
+	glUniform2f(prog.image.uniform_viewport_size, (GLfloat)prog.window_size[0],
+	            (GLfloat)prog.window_size[1]);
 	glUniform1f(prog.image.uniform_perfect_scale, perfect_scale);
 
 	prog.drag_mode            = GL_FALSE;
@@ -448,10 +417,8 @@ void glfw_cursorpos_cb(GLFWwindow *w, GLdouble x, GLdouble y) {
 	prog.cursor[1] = y;
 
 	if (prog.drag_mode) {
-		prog.image.logical_pos[0] =
-		    GLFW_TO_SCREEN_X(x) - prog.drag_start[0];
-		prog.image.logical_pos[1] =
-		    GLFW_TO_SCREEN_Y(y) - prog.drag_start[1];
+		prog.image.logical_pos[0] = GLFW_TO_SCREEN_X(x) - prog.drag_start[0];
+		prog.image.logical_pos[1] = GLFW_TO_SCREEN_Y(y) - prog.drag_start[1];
 	}
 }
 
@@ -463,10 +430,10 @@ void glfw_click_cb(GLFWwindow *w, GLint button, GLint action, GLint mods) {
 	case GLFW_MOUSE_BUTTON_1: {
 		switch (action) {
 		case GLFW_PRESS: {
-			prog.drag_start[0] = GLFW_TO_SCREEN_X(prog.cursor[0]) -
-			                     prog.image.logical_pos[0];
-			prog.drag_start[1] = GLFW_TO_SCREEN_Y(prog.cursor[1]) -
-			                     prog.image.logical_pos[1];
+			prog.drag_start[0] =
+				GLFW_TO_SCREEN_X(prog.cursor[0]) - prog.image.logical_pos[0];
+			prog.drag_start[1] =
+				GLFW_TO_SCREEN_Y(prog.cursor[1]) - prog.image.logical_pos[1];
 			prog.drag_mode = GL_TRUE;
 		} break;
 
@@ -506,10 +473,8 @@ void glfw_scroll_cb(GLFWwindow *w, GLdouble x, GLdouble y) {
 
 	// Zoom from mouse cursor instead of origin (0, 0).
 	prog.image.scale *= amt;
-	prog.image.logical_pos[0] =
-	    at_x - (at_x - prog.image.logical_pos[0]) * amt;
-	prog.image.logical_pos[1] =
-	    at_y - (at_y - prog.image.logical_pos[1]) * amt;
-	prog.drag_start[0] = at_x - prog.image.logical_pos[0];
-	prog.drag_start[1] = at_y - prog.image.logical_pos[1];
+	prog.image.logical_pos[0] = at_x - (at_x - prog.image.logical_pos[0]) * amt;
+	prog.image.logical_pos[1] = at_y - (at_y - prog.image.logical_pos[1]) * amt;
+	prog.drag_start[0]        = at_x - prog.image.logical_pos[0];
+	prog.drag_start[1]        = at_y - prog.image.logical_pos[1];
 }
