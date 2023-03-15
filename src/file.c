@@ -1,4 +1,5 @@
 #include "include/file.h"
+#include "include/list.h"
 
 bool is_folder(const char *folder_path) {
 	struct stat sb;
@@ -6,13 +7,12 @@ bool is_folder(const char *folder_path) {
 }
 
 bool is_file(const char *file_path) {
-	// Check if this file exists. A return value of 0 means yes, so we not it.
+	// Check if this file exists. A return value of 0 means yes, so we not
+	// it.
 	return !access(file_path, F_OK);
 }
 
-const char *get_filename() {
-
-}
+const char *get_filename() {}
 
 int count_files_in_dir(const char *dir_path) {
 	DIR *dir = opendir(dir_path);
@@ -28,36 +28,47 @@ int count_files_in_dir(const char *dir_path) {
 	return file_count;
 }
 
-void get_filenames_in_dir(const char *dir_path, char ***outlist, int *outcount) {
+/* portable mempcpy, written by u/N-R-K on Reddit */
+void *mem_copy(void *restrict dst, const void *restrict src, size_t n) {
+	return memcpy(dst, src, n) + n;
+}
+
+list_node *get_filenames_in_dir(const char *dir_path) {
 	DIR *dir = opendir(dir_path);
-	if (!dir) return;
+	if (!dir) return NULL;
 
 	struct dirent *entry;
 
-	*outcount = count_files_in_dir(dir_path);
-	if (*outcount == -1) return;
-
 	int pathlen = strlen(dir_path);
 
-	// Allocate array to hold strings.
-	*outlist = malloc((*outcount) * sizeof(char *)); 
-	
-	// Allocate strings.
-	for (int i = 0; i < (*outcount); ++i) {
-		// For whatever reason, d_name is max 256 chars.
-		(*outlist)[i] = malloc((pathlen + 257) * sizeof(char)); 
-	}
+	// Set up first node; make it current; save for returning later.
+	list_node *current_node = malloc(sizeof(list_node));
+	if (!current_node) return NULL;
+	current_node->prev   = NULL;
+	list_node *next_node = NULL;
+	list_node *beginning = current_node;
 
-	int j = 0;
 	while ((entry = readdir(dir)) != NULL) {
 		if (entry->d_type == DT_REG) {
-			// Must be copied, because d_name will soon be freed.
-			strcpy((*outlist)[j], dir_path);
-			strncat((*outlist)[j++], entry->d_name, 257);
+			size_t d_name_len  = strlen(entry->d_name);
+			current_node->item = malloc(pathlen + d_name_len + 1);
+			if (!current_node->item) return NULL;
+
+			// I think I'm doing this right.
+			*((char *)mem_copy(
+			    mem_copy(current_node->item, dir_path, pathlen),
+			    entry->d_name, d_name_len)) = '\0';
+
+			// Create next node.
+			next_node    = insert_after(current_node, NULL);
+			current_node = next_node;
 		}
 	}
 
+
+	current_node->prev->next = NULL;
+	free(current_node); // Last one is always unused.
+
 	closedir(dir);
+	return beginning;
 }
-
-

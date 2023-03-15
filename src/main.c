@@ -16,6 +16,7 @@
 #include "include/conf.h"
 #include "include/console.h"
 #include "include/file.h"
+#include "include/list.h"
 #include "include/render.h"
 
 int         switch_sample  = SWITCH_LANCZOS;
@@ -23,7 +24,7 @@ bool        many_file_mode = false;
 const char *path_to_image  = NULL;
 glasses     prog           = { 0 };
 
-int switch_long(const char *long_switch) {
+static int switch_long(const char *long_switch) {
 	if (strcmp(long_switch, "--help") == 0) {
 		print_help();
 		exit(0);
@@ -44,7 +45,7 @@ int switch_long(const char *long_switch) {
 	return -1;
 }
 
-int switch_short(const char *switches) {
+static int switch_short(const char *switches) {
 	int len = strlen(switches);
 	for (int i = 1; i < len; ++i) {
 		switch (switches[i]) {
@@ -84,16 +85,22 @@ int main(int argc, char **argv) {
 
 	stbi_set_flip_vertically_on_load(1);
 	bool found_image = false;
+	bool stop_opt    = false;
 
+	// Handle arguments.
 	for (int i = 1; i < argc; ++i) {
-		if (argv[i][0] == '-' && argv[i][1] != '\0' &&
-		    argv[i][1] != '-') {
+		if (!stop_opt && strcmp(argv[i], "--") == 0) {
+			// dash dash stops option parsing
+			stop_opt = true;
+		} else if (!stop_opt && argv[i][0] == '-' &&
+		           argv[i][1] != '\0' && argv[i][1] != '-') {
 			// argv[i] is a short switch.
 			if (switch_short(argv[i]) < 0) {
 				print_error("Invalid argument: `%s.'", argv[i]);
 				return EXIT_FAILURE;
 			}
-		} else if (argv[i][0] == '-' && argv[i][1] == '-') {
+		} else if (!stop_opt && argv[i][0] == '-' &&
+		           argv[i][1] == '-') {
 			// argv[i] is a long switch.
 			if (switch_long(argv[i]) < 0) {
 				print_error("Invalid argument: `%s.'", argv[i]);
@@ -102,7 +109,7 @@ int main(int argc, char **argv) {
 		} else if (is_folder(argv[i]) && !found_image) {
 			many_file_mode      = true;
 			prog.many_files_dir = argv[i];
-			found_image = true;
+			found_image         = true;
 		} else if (is_file(argv[i]) && !found_image &&
 		           !many_file_mode) {
 			// argv[i] is the path to the image.
@@ -134,20 +141,30 @@ int main(int argc, char **argv) {
 		prog.imgheight_f = (GLfloat)prog.imgheight;
 	} else {
 		int dirstrlen = strlen(prog.many_files_dir);
-		if (prog.many_files_dir[dirstrlen-1] != '/') {
-			char *tmp = malloc((dirstrlen+2) * sizeof(char));
-			strcpy(tmp, prog.many_files_dir);
-			strcat(tmp, "/");
+		if (prog.many_files_dir[dirstrlen - 1] != '/') {
+			// If there is no trailing slash, append one.
+			char  slash[] = "/";
+			char *tmp     = malloc(dirstrlen + sizeof slash);
+			char *p = mem_copy(tmp, prog.many_files_dir, dirstrlen);
+			p       = mem_copy(p, slash,
+			                   sizeof slash); /* also copies the nul-byte
+			                                     from `slash` */
 			prog.many_files_dir = tmp;
 		}
-		get_filenames_in_dir(prog.many_files_dir, &prog.many_files,
-		                     &prog.count_many_files);
-		prog.index_many_files = 0;
-		if (prog.count_many_files < 1) exit(EXIT_FAILURE);
-		if (many_files_next(&prog) != 0) {
-			print_error("No image files in directory.");
-			exit(EXIT_FAILURE);
+		prog.many_files = get_filenames_in_dir(prog.many_files_dir);
+		if (!prog.many_files) exit(EXIT_FAILURE);
+		// Try load first file.
+		if (!many_files_load(prog.many_files)) {
+			// Keep trying until a valid image is found; otherwise,
+			// exit.
+			if (many_files_next(&prog) != 0) {
+				print_error("No image files in directory.");
+				exit(EXIT_FAILURE);
+			}
 		}
+		prog.many_files_total_count = count_nodes(prog.many_files);
+		prog.many_files_current_index =
+		    get_index_from_beginning(prog.many_files);
 	}
 
 	// GLFW init.

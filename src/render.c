@@ -119,7 +119,7 @@ GLint renderer_init(glasses *g) {
 		                GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 		                GL_NEAREST);
-		glUniform1i(prog.image.uniform_is_lanczos, 0);
+		glUniform1i(g->image.uniform_is_lanczos, 0);
 	} break;
 
 	case SWITCH_BILINEAR: {
@@ -127,7 +127,7 @@ GLint renderer_init(glasses *g) {
 		                GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 		                GL_LINEAR);
-		glUniform1i(prog.image.uniform_is_lanczos, 0);
+		glUniform1i(g->image.uniform_is_lanczos, 0);
 	} break;
 
 	case SWITCH_LANCZOS: {
@@ -135,7 +135,7 @@ GLint renderer_init(glasses *g) {
 		                GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 		                GL_NEAREST);
-		glUniform1i(prog.image.uniform_is_lanczos, 1);
+		glUniform1i(g->image.uniform_is_lanczos, 1);
 	} break;
 
 #if GLASSES2_DEBUG
@@ -153,57 +153,79 @@ GLint renderer_init(glasses *g) {
 		                GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 		                GL_NEAREST);
-		glUniform1i(prog.image.uniform_is_lanczos, 0);
+		glUniform1i(g->image.uniform_is_lanczos, 0);
 	} break;
 #endif
 	}
 
-	glUniform2f(prog.image.uniform_viewport_size,
-	            (GLfloat)prog.window_size[0], (GLfloat)prog.window_size[1]);
-	glUniform1f(prog.image.uniform_perfect_scale, 1.0f);
+	glUniform2f(g->image.uniform_viewport_size, (GLfloat)g->window_size[0],
+	            (GLfloat)g->window_size[1]);
+	glUniform1f(g->image.uniform_perfect_scale, 1.0f);
 
 	return EXIT_SUCCESS;
 }
 
 GLint many_files_prev(glasses *g) {
-	int cpy_index = g->index_many_files;
-	int r         = -1;
-	do { --(g->index_many_files); } while ((r = many_files_load(g)) == -1);
-	if (r == -2) {
-		g->index_many_files = cpy_index;
-		return -1;
-	} else if (r == -3) {
-		g->index_many_files = cpy_index;
-		return -1;
-	}
+	if (!g->many_files->prev) return -1;
 
-	return 0;
+	list_node *current_enum = g->many_files->prev;
+	for (;;) {
+		// If file is invalid.
+		if (!many_files_load(current_enum)) {
+			current_enum = current_enum->next;
+			// Remove it, bringing the next ones up.
+			remove_node_free(current_enum->prev, true);
+		} else {
+			// Found valid image.
+			g->many_files             = current_enum;
+			g->many_files_total_count = count_nodes(g->many_files);
+			g->many_files_current_index =
+			    get_index_from_beginning(g->many_files);
+			return 0;
+		}
+
+		// No more left.
+		if (!current_enum->prev) return -1;
+		current_enum = current_enum->prev;
+	}
 }
+
 GLint many_files_next(glasses *g) {
-	int cpy_index = g->index_many_files;
-	int r         = -1;
-	do { ++(g->index_many_files); } while ((r = many_files_load(g)) == -1);
-	if (r == -2) {
-		g->index_many_files = cpy_index;
-		return -1;
-	} else if (r == -3) {
-		g->index_many_files = cpy_index;
-		return -1;
-	}
+	if (!g->many_files->next) return -1;
 
-	return 0;
+	list_node *current_enum = g->many_files->next;
+	for (;;) {
+		// If file is invalid.
+		if (!many_files_load(current_enum)) {
+			current_enum = current_enum->prev;
+			// Remove it, bringing the next ones down.
+			remove_node_free(current_enum->next, true);
+		} else {
+			// Found valid image.
+			g->many_files             = current_enum;
+			g->many_files_total_count = count_nodes(g->many_files);
+			g->many_files_current_index =
+			    get_index_from_beginning(g->many_files);
+			return 0;
+		}
+
+		// No more left.
+		if (!current_enum->next) return -1;
+		current_enum = current_enum->next;
+	}
 }
 
-GLint many_files_load(glasses *g) {
-	if (g->index_many_files >= g->count_many_files) return -2;
-	if (g->index_many_files < 0) return -3;
+list_node *many_files_load(list_node *file_node) {
+	if (!file_node) return NULL;
+	if (!file_node->item) return NULL;
+
 	prog.imgdata =
-	    stbi_load(g->many_files[g->index_many_files], &prog.imgwidth,
-	              &prog.imgheight, &prog.imgchannels, STBI_rgb_alpha);
-	if (!prog.imgdata) return -1;
+	    stbi_load(file_node->item, &prog.imgwidth, &prog.imgheight,
+	              &prog.imgchannels, STBI_rgb_alpha);
+	if (!prog.imgdata) return NULL;
 	prog.imgwidth_f  = (GLfloat)prog.imgwidth;
 	prog.imgheight_f = (GLfloat)prog.imgheight;
-	return 0;
+	return file_node;
 }
 
 GLint renderer_send_image(glasses *g) {
@@ -217,8 +239,7 @@ GLint renderer_send_image(glasses *g) {
 	             GL_RGBA, GL_UNSIGNED_BYTE, g->imgdata);
 	stbi_image_free(g->imgdata);
 
-	glUniform2f(prog.image.uniform_texsize, prog.imgwidth_f,
-	            prog.imgheight_f);
+	glUniform2f(g->image.uniform_texsize, g->imgwidth_f, g->imgheight_f);
 }
 
 void glfw_error_cb(GLint e, const GLchar *desc) {
@@ -315,6 +336,10 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
 				prog.image.scale          = 1.0f;
 				glUniform1f(prog.image.uniform_perfect_scale,
 				            perfect_scale);
+
+				print_debug("Current Image: [%d/%d].\n",
+				            prog.many_files_current_index,
+				            prog.many_files_total_count);
 			}
 		} break;
 
@@ -343,6 +368,10 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
 				prog.image.scale          = 1.0f;
 				glUniform1f(prog.image.uniform_perfect_scale,
 				            perfect_scale);
+
+				print_debug("Current Image: [%d/%d].\n",
+				            prog.many_files_current_index,
+				            prog.many_files_total_count);
 			}
 		} break;
 

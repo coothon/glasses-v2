@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "common.h"
+#include "list.h"
 #include "conf.h"
 #include "console.h"
 
@@ -46,10 +47,10 @@ typedef struct renderer {
 } renderer;
 
 typedef struct glasses {
-	GLchar **many_files;
+	int many_files_total_count;
+	int many_files_current_index;
+	list_node *many_files;
 	GLchar *many_files_dir;
-	int count_many_files;
-	int index_many_files;
 	GLdouble    total_time;
 	GLdouble    cursor[2];
 	GLboolean   drag_mode;
@@ -67,7 +68,7 @@ extern glasses prog;
 GLint renderer_init(glasses *g);
 GLint many_files_prev(glasses *g);
 GLint many_files_next(glasses *g);
-GLint many_files_load(glasses *g);
+list_node *many_files_load(list_node *file_node);
 GLint renderer_send_image(glasses *g);
 
 void glfw_error_cb(GLint e, const GLchar *desc);
