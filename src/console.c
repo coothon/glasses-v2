@@ -2,17 +2,12 @@
 
 void print_help(void) {
 	puts("Glasses:");
-	puts(
-		"  This is a program for viewing images \"interactively\": click and drag");
-	puts(
-		"  to move the image, and scroll to zoom. See --keybinds for more. Should");
-	puts(
-		"  support whatever images stb_image.h supports, as long as it can be");
+	puts("  This is a program for viewing images \"interactively\": click and drag");
+	puts("  to move the image, and scroll to zoom. See --keybinds for more. Should");
+	puts("  support whatever images stb_image.h supports, as long as it can be");
 	puts("  converted to RGBA.");
-	puts(
-		"    The program uses OpenGL hardware acceleration, thus it will not work");
-	puts(
-		"  without a video card that supports OpenGL and appopriate drivers. If you");
+	puts("    The program uses OpenGL hardware acceleration, thus it will not work");
+	puts("  without a video card that supports OpenGL and appopriate drivers. If you");
 	puts("  are unsure whether you have that, you probably do.");
 	puts("");
 	puts("Usage:");

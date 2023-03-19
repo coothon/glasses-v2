@@ -2,8 +2,7 @@
 #define GLASSES2_COMMON_H_
 // Commonly used things.
 
-#include "glad.h"
-#include "khrplatform.h"
+#include "gl.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 

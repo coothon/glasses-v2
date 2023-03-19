@@ -14,16 +14,25 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS := $(INC_FLAGS) -MMD -MP
 
-.PHONY: clean
+.PHONY: clean run analyze all
+
+all: clean $(BUILD_DIR)/$(PROJ_NAME)
 
 $(BUILD_DIR)/$(PROJ_NAME): $(OBJS)
 	$(CC) $(OBJS) $(LDFLAGS) -o $@
+
+# The "insecureAPI" check is often tells you to use non-portable functions, so turn it off.
+# The valist check is buggy, so turn it off, too.
+analyze:
+	@clang-tidy $(SRCS) --quiet \
+		--checks="-clang-analyzer-security.insecureAPI.*,-clang-analyzer-valist.Uninitialized" \
+		-- $(CPPFLAGS) $(CFLAGS)
 
 $(BUILD_DIR)/%.c.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -r $(BUILD_DIR)
+	-rm -r $(BUILD_DIR)
 
 -include $(DEPS)
