@@ -364,21 +364,15 @@ void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action, GLint m
 
 void glfw_framebuffer_size_cb(GLFWwindow *w, GLint fbwidth, GLint fbheight) {
 	(void)w;
-	GLfloat perfect_scale = 0.0f;
-
+	
 	prog.window_size[0] = fbwidth;
 	prog.window_size[1] = fbheight;
 	glViewport(0, 0, fbwidth, fbheight);
 
-	if (prog.window_size[0] < prog.window_size[1]) {
-		perfect_scale = (prog.imgwidth_f > prog.imgheight_f) ? prog.window_size[0] / prog.imgwidth_f
-															 : prog.window_size[0] / prog.imgheight_f;
-	} else {
-		perfect_scale = (prog.imgwidth_f > prog.imgheight_f) ? prog.window_size[1] / prog.imgwidth_f
-															 : prog.window_size[1] / prog.imgheight_f;
-	}
+	// This code actually scales the image to fit, as intended.
+	GLfloat perfect_scale = fminf((GLfloat)(prog.window_size[0]) / prog.imgwidth_f, (GLfloat)(prog.window_size[1]) / prog.imgheight_f);
 
-	glUniform2f(prog.image.uniform_viewport_size, (GLfloat)prog.window_size[0], (GLfloat)prog.window_size[1]);
+	glUniform2f(prog.image.uniform_viewport_size, (GLfloat)(prog.window_size[0]), (GLfloat)(prog.window_size[1]));
 	glUniform1f(prog.image.uniform_perfect_scale, perfect_scale);
 
 	prog.drag_mode = GL_FALSE;

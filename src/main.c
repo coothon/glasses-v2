@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
 
 	{ // Load GLAD2.
 		int version = gladLoadGL(glfwGetProcAddress);
-		printf("GL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+		print_info("GL version: %d.%d.", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 	}
 
 	glfwGetFramebufferSize(prog.win, &prog.window_size[0], &prog.window_size[1]);

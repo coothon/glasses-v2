@@ -1,6 +1,8 @@
 #ifndef GLASSES2_RENDER_H_
 #define GLASSES2_RENDER_H_
 
+#include <math.h>
+
 #define _DEFAULT_SOURCE 1
 #include "gl.h"
 #define GLFW_INCLUDE_NONE
