@@ -47,8 +47,8 @@ static int switch_long(const char *long_switch) {
 }
 
 static int switch_short(const char *switches) {
-	int len = strlen(switches);
-	for (int i = 1; i < len; ++i) {
+	size_t len = strlen(switches);
+	for (size_t i = 1; i < len; ++i) {
 		switch (switches[i]) {
 		case 'h': {
 			switch_sample = SWITCH_LANCZOS;
@@ -92,7 +92,8 @@ int main(int argc, char **argv) {
 		if (!stop_opt && strcmp(argv[i], "--") == 0) {
 			// dash dash stops option parsing
 			stop_opt = true;
-		} else if (!stop_opt && argv[i][0] == '-' && argv[i][1] != '\0' && argv[i][1] != '-') {
+		} else if (!stop_opt && argv[i][0] == '-' && argv[i][1] != '\0' &&
+		           argv[i][1] != '-') {
 			// argv[i] is a short switch.
 			if (switch_short(argv[i]) < 0) {
 				print_error("Invalid argument: `%s.'", argv[i]);
@@ -124,22 +125,24 @@ int main(int argc, char **argv) {
 	if (!many_file_mode) {
 		// Get user-supplied image from disk.
 		prog.current_image = path_to_image;
-		prog.imgdata = stbi_load(path_to_image, &prog.imgwidth, &prog.imgheight, &prog.imgchannels, STBI_rgb_alpha);
+		prog.imgdata = stbi_load(path_to_image, &prog.imgwidth, &prog.imgheight,
+		                         &prog.imgchannels, STBI_rgb_alpha);
 		if (!prog.imgdata) {
-			print_error("Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
-						path_to_image);
+			print_error(
+				"Unable to load image from file `%s,' or the file is not a supported format (see `--help').",
+				path_to_image);
 			return EXIT_FAILURE;
 		}
 		prog.imgwidth_f = (GLfloat)prog.imgwidth;
 		prog.imgheight_f = (GLfloat)prog.imgheight;
 	} else {
-		int dirstrlen = strlen(prog.many_files_dir);
+		size_t dirstrlen = strlen(prog.many_files_dir);
 		if (prog.many_files_dir[dirstrlen - 1] != '/') {
 			// If there is no trailing slash, append one.
 			char slash[] = "/";
 			char *tmp = malloc(dirstrlen + sizeof slash);
 			mem_copy(mem_copy(tmp, prog.many_files_dir, dirstrlen), slash,
-					 sizeof slash); /* also copies the nul-byte from `slash` */
+			         sizeof slash); /* also copies the nul-byte from `slash` */
 			prog.many_files_dir = tmp;
 		}
 
@@ -159,7 +162,8 @@ int main(int argc, char **argv) {
 			}
 		}
 		prog.many_files_total_count = count_nodes(prog.many_files);
-		prog.many_files_current_index = get_index_from_beginning(prog.many_files);
+		prog.many_files_current_index =
+			get_index_from_beginning(prog.many_files);
 	}
 
 	// GLFW init.
@@ -189,10 +193,12 @@ int main(int argc, char **argv) {
 
 	{ // Load GLAD2.
 		int version = gladLoadGL(glfwGetProcAddress);
-		print_info("GL version: %d.%d.", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+		print_info("GL version: %d.%d.", GLAD_VERSION_MAJOR(version),
+		           GLAD_VERSION_MINOR(version));
 	}
 
-	glfwGetFramebufferSize(prog.win, &prog.window_size[0], &prog.window_size[1]);
+	glfwGetFramebufferSize(prog.win, &prog.window_size[0],
+	                       &prog.window_size[1]);
 	glViewport(0, 0, prog.window_size[0], prog.window_size[1]);
 
 	glfwSetFramebufferSizeCallback(prog.win, glfw_framebuffer_size_cb);
@@ -211,8 +217,10 @@ int main(int argc, char **argv) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUniform1f(prog.image.uniform_scale, prog.image.scale);
-		glUniform2f(prog.image.uniform_logical_pos, prog.image.logical_pos[0], prog.image.logical_pos[1]);
-		glDrawElements(GL_TRIANGLES, prog.image.num_indices, GL_UNSIGNED_INT, 0);
+		glUniform2f(prog.image.uniform_logical_pos, prog.image.logical_pos[0],
+		            prog.image.logical_pos[1]);
+		glDrawElements(GL_TRIANGLES, prog.image.num_indices, GL_UNSIGNED_INT,
+		               0);
 
 		glfwSwapBuffers(prog.win);
 		glfwWaitEvents();

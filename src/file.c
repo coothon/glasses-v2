@@ -39,10 +39,10 @@ list_node *get_filenames_in_dir(const char *dir_path) {
 
 	struct dirent *entry;
 
-	int pathlen = strlen(dir_path);
+	size_t pathlen = strlen(dir_path);
 
 	// Set up first node; make it current; save for returning later.
-	list_node *current_node = malloc(sizeof(list_node));
+	list_node *current_node = calloc(sizeof(list_node), 1);
 	if (!current_node)
 		return NULL;
 	current_node->prev = NULL;
