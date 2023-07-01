@@ -1,23 +1,21 @@
 #ifndef GLASSES2_RENDER_H_
 #define GLASSES2_RENDER_H_
 
+#define _DEFAULT_SOURCE 1
 #include <math.h>
 
-#define _DEFAULT_SOURCE 1
-#include "gl.h"
-#define GLFW_INCLUDE_NONE
 #include "common.h"
 #include "conf.h"
-#include "console.h"
+#include "console_log.h"
+#include "gl.h"
 #include "list.h"
 #include "stb_image.h"
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#define GL_TO_SCREEN_X(pos) \
-	(GLfloat)((pos)) - ((GLfloat)(prog.window_size[0]) / 2.0f)
-#define GL_TO_SCREEN_Y(pos) \
-	-((GLfloat)((pos)) - ((GLfloat)(prog.window_size[1]) / 2.0f))
+#define GL_TO_SCREEN_X(pos) (GLfloat)((pos)) - ((GLfloat)(prog.window_size[0]) / 2.0f)
+#define GL_TO_SCREEN_Y(pos) -((GLfloat)((pos)) - ((GLfloat)(prog.window_size[1]) / 2.0f))
 
 // Multiplies by 1.1f.
 #define ZOOM_INC 1.1f
@@ -74,8 +72,7 @@ list_node *many_files_load(list_node *file_node);
 void renderer_send_image(glasses *g);
 
 void glfw_error_cb(GLint e, const GLchar *desc);
-void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action,
-                 GLint mods);
+void glfw_key_cb(GLFWwindow *w, GLint key, GLint scancode, GLint action, GLint mods);
 void glfw_framebuffer_size_cb(GLFWwindow *w, GLint fbwidth, GLint fbheight);
 void glfw_cursorpos_cb(GLFWwindow *w, GLdouble x, GLdouble y);
 void glfw_click_cb(GLFWwindow *w, GLint button, GLint action, GLint mods);

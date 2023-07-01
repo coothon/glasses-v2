@@ -2,8 +2,7 @@
 
 list_node *at_index_from(list_node *origin, int index) {
 	if (!origin)
-		return NULL;
-
+		return 0;
 
 	list_node *node = origin;
 
@@ -13,8 +12,7 @@ list_node *at_index_from(list_node *origin, int index) {
 			if (node->prev)
 				node = node->prev;
 			else
-				return NULL; // Error if index is out of range.
-
+				return 0; // Error if index is out of range.
 		return node;
 	}
 
@@ -22,21 +20,20 @@ list_node *at_index_from(list_node *origin, int index) {
 		if (node->next)
 			node = node->next;
 		else
-			return NULL; // Error if index is out of range.
-
+			return 0; // Error if index is out of range.
 	return node;
 }
 
-list_node *insert_after(list_node *node, const char *to_insert) {
+list_node *insert_after(list_node *restrict node, const char *restrict to_insert) {
 	if (!node)
-		return NULL;
+		return 0;
 
 	// Create new node.
 	list_node *left = node;
 	list_node *right = left->next;
 	list_node *insert = malloc(sizeof(list_node));
 	if (!insert)
-		return NULL;
+		return 0;
 	insert->item = to_insert;
 
 	// Link them.
@@ -49,16 +46,16 @@ list_node *insert_after(list_node *node, const char *to_insert) {
 	return insert;
 }
 
-list_node *insert_before(list_node *node, const char *to_insert) {
+list_node *insert_before(list_node *restrict node, const char *restrict to_insert) {
 	if (!node)
-		return NULL;
+		return 0;
 
 	// Create new node.
 	list_node *right = node;
 	list_node *left = right->prev;
 	list_node *insert = malloc(sizeof(list_node));
 	if (!insert)
-		return NULL;
+		return 0;
 	insert->item = to_insert;
 
 	// Link them.
@@ -73,16 +70,16 @@ list_node *insert_before(list_node *node, const char *to_insert) {
 
 list_node *seek_beginning(list_node *node) {
 	if (!node)
-		return NULL;
+		return 0;
 
 	// Already at the beginning.
-	if (node->prev == NULL)
+	if (!node->prev)
 		return node;
 
 	list_node *begin = node;
 
 	// Traverse the list, stopping at the beginning.
-	while (begin->prev != NULL)
+	while (begin->prev)
 		begin = begin->prev;
 
 	return begin;
@@ -90,16 +87,16 @@ list_node *seek_beginning(list_node *node) {
 
 list_node *seek_end(list_node *node) {
 	if (!node)
-		return NULL;
+		return 0;
 
 	// Already at the end.
-	if (node->next == NULL)
+	if (!node->next)
 		return node;
 
 	list_node *end = node;
 
 	// Traverse the list, stopping at the end.
-	while (end->next != NULL)
+	while (end->next)
 		end = end->next;
 
 	return end;
@@ -115,7 +112,7 @@ int count_nodes(list_node *node) {
 	int count = 0;
 	do {
 		++count;
-	} while ((beginning = beginning->next) != NULL);
+	} while (beginning = beginning->next);
 
 	return count;
 }
@@ -131,7 +128,7 @@ int get_index_from_beginning(list_node *node) {
 		++count;
 		if (beginning == node)
 			break;
-	} while ((beginning = beginning->next) != NULL);
+	} while (beginning = beginning->next);
 
 	return count;
 }

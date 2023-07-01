@@ -1,20 +1,20 @@
 include make.conf
 
-BUILD_DIR := ./build
-SRC_DIRS := ./src
+BUILD_DIR:=./build
+SRC_DIRS:=./src
 
-SRCS := $(shell find $(SRC_DIRS) -name '*.c' -or -name '*.s')
+SRCS:=$(shell find $(SRC_DIRS) -name '*.c' -or -name '*.s')
 
-ANALYZE_SRCS := $(shell find $(SRC_DIRS) -name '*.c' -or -name '*.s' -or -name '*.h')
+ANALYZE_SRCS:=$(shell find $(SRC_DIRS) -name '*.c' -or -name '*.s' -or -name '*.h')
 
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+OBJS:=$(SRCS:%=$(BUILD_DIR)/%.o)
 
-DEPS := $(OBJS:.o=.d)
+DEPS:=$(OBJS:.o=.d)
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+INC_DIRS:=$(shell find $(SRC_DIRS) -type d)
+INC_FLAGS:=$(addprefix -I,$(INC_DIRS))
 
-CPPFLAGS := $(INC_FLAGS) -MMD -MP
+CPPFLAGS:=$(INC_FLAGS) -MMD -MP
 
 .PHONY: clean analyze all
 

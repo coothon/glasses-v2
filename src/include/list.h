@@ -6,11 +6,10 @@
 #include <stdlib.h>
 
 typedef struct list_node list_node;
-
 struct list_node {
 	char *item;
-	list_node *next; // NULL marks this as the end;
-	list_node *prev; // NULL marks this as the beginning.
+	list_node *next; // 0 marks this as the end;
+	list_node *prev; // 0 marks this as the beginning.
 };
 
 #define PRINT_LIST_FROM(list)                   \
@@ -30,8 +29,8 @@ list_node *at_index_from(list_node *origin, int index);
 int get_index_from_beginning(list_node *node);
 
 // Assumes to_insert has sufficient scope; essentially must be malloced.
-list_node *insert_after(list_node *node, const char *to_insert);
-list_node *insert_before(list_node *node, const char *to_insert);
+list_node *insert_after(list_node *restrict node, const char *restrict to_insert);
+list_node *insert_before(list_node *restrict node, const char *restrict to_insert);
 
 list_node *seek_beginning(list_node *node);
 list_node *seek_end(list_node *node);
